@@ -15,16 +15,39 @@ class AuctionListPage extends StatefulWidget {
 class _AuctionListPageState extends State<AuctionListPage> {
   final AuctionService _auctionService = AuctionService();
   late Future<List<AuctionItem>> _auctions;
+  List<Map<String, dynamic>> _categories = [];
+  int? _selectedCategoryId;
 
   @override
   void initState() {
     super.initState();
+    _loadCategories();
     _auctions = _auctionService.getAuctions();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final categories = await _auctionService.getCategories();
+      setState(() {
+        _categories = categories;
+      });
+    } catch (e) {
+      debugPrint("Error loading categories: $e");
+    }
   }
 
   Future<void> _refreshAuctions() async {
     setState(() {
-      _auctions = _auctionService.getAuctions();
+      _auctions = _auctionService.getAuctions(
+        kategoriId: _selectedCategoryId,
+      );
+    });
+  }
+
+  void _onCategoryChanged(int? id) {
+    setState(() {
+      _selectedCategoryId = id;
+      _auctions = _auctionService.getAuctions(kategoriId: id);
     });
   }
 
@@ -32,7 +55,6 @@ class _AuctionListPageState extends State<AuctionListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // background gradient
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFF2575FC), Color(0xFF6A11CB)],
@@ -69,8 +91,10 @@ class _AuctionListPageState extends State<AuctionListPage> {
                             final authService = AuthService();
                             await authService.logout();
                             if (mounted) {
-                              Navigator.push(context,
-                                  MaterialPageRoute(builder: (context) => const LoginPage()));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const LoginPage()),
+                              );
                             }
                           },
                         ),
@@ -80,14 +104,42 @@ class _AuctionListPageState extends State<AuctionListPage> {
                 ),
               ),
 
-              // body
+              // Dropdown kategori
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: DropdownButton<int>(
+                    value: _selectedCategoryId,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    hint: const Text("Filter berdasarkan kategori"),
+                    items: _categories
+                        .map((cat) => DropdownMenuItem<int>(
+                              value: cat['id'],
+                              child: Text(cat['nama_kategori']),
+                            ))
+                        .toList(),
+                    onChanged: _onCategoryChanged,
+                  ),
+                ),
+              ),
+
+              // body list
               Expanded(
                 child: FutureBuilder<List<AuctionItem>>(
                   future: _auctions,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator(color: Colors.white));
+                      return const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      );
                     }
+
                     if (snapshot.hasError) {
                       return Center(
                         child: Text(
@@ -101,8 +153,10 @@ class _AuctionListPageState extends State<AuctionListPage> {
                     final items = snapshot.data ?? [];
                     if (items.isEmpty) {
                       return const Center(
-                        child: Text("Belum ada barang lelang",
-                            style: TextStyle(color: Colors.white, fontSize: 16)),
+                        child: Text(
+                          "Belum ada barang lelang",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
                       );
                     }
 
@@ -162,8 +216,6 @@ class _AuctionListPageState extends State<AuctionListPage> {
                                         ),
                                       ),
                                       const SizedBox(height: 8),
-
-                                      // badge status
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                         decoration: BoxDecoration(
@@ -175,7 +227,9 @@ class _AuctionListPageState extends State<AuctionListPage> {
                                         child: Text(
                                           item.status.toUpperCase(),
                                           style: TextStyle(
-                                            color: item.status == "aktif" ? Colors.green : Colors.grey,
+                                            color: item.status == "aktif"
+                                                ? Colors.green
+                                                : Colors.grey,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -183,8 +237,6 @@ class _AuctionListPageState extends State<AuctionListPage> {
                                     ],
                                   ),
                                 ),
-
-                                // tombol lihat detail
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                                   child: ElevatedButton.icon(
@@ -199,7 +251,7 @@ class _AuctionListPageState extends State<AuctionListPage> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => AuctionDetailPage(item: item),
+                                          builder: (_) => AuctionDetailPage(item: item),
                                         ),
                                       );
                                     },
