@@ -31,26 +31,23 @@ class AuctionService {
     }
   }
 
-//   Future<bool> placeBid(int auctionId, int amount) async {
-//   final token = await _getToken();
-//   final response = await http.post(
-//     Uri.parse("$baseUrl/api/auctions/$auctionId/bid"),
-//     headers: {
-//       "Authorization": "Bearer $token",
-//       "Accept": "application/json",
-//     },
-//     body: {
-//       "harga_bid": amount.toString(),
-//     },
-//   );
+  Future<bool> placebid(int auctionId, int bidAmount) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/auctions/$auctionId/bid"),
+        body: {'amount': bidAmount.toString()},
+      );
 
-//   if (response.statusCode == 200) {
-//     return true;
-//   } else {
-//     throw Exception("Gagal ikut lelang: ${response.body}");
-//   }
-// }
-
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print("Error saat place bid: $e");
+      return false;
+    }
+  }
 
   
 }

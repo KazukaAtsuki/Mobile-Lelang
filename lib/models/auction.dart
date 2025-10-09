@@ -10,12 +10,14 @@ class AuctionItem {
   final DateTime waktuMulai;
   final DateTime waktuSelesai;
   final String status;
+  final String? kategori;
 
   AuctionItem({
     required this.id,
     required this.gambarBarang,
     required this.namaBarang,
     this.kategoriId,
+    this.kategori,
     this.winnerId,
     required this.deskripsi,
     required this.hargaAwal,
@@ -38,6 +40,7 @@ class AuctionItem {
       waktuMulai: DateTime.parse(json['waktu_mulai']),
       waktuSelesai: DateTime.parse(json['waktu_selesai']),
       status: json['status'],
+      kategori: json['kategori'],
     );
   }
 }
