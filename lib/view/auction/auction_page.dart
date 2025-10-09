@@ -67,7 +67,8 @@ class _AuctionListPageState extends State<AuctionListPage> {
             children: [
               // AppBar custom
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -93,7 +94,8 @@ class _AuctionListPageState extends State<AuctionListPage> {
                             if (mounted) {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (_) => const LoginPage()),
+                                MaterialPageRoute(
+                                    builder: (_) => const LoginPage()),
                               );
                             }
                           },
@@ -106,7 +108,8 @@ class _AuctionListPageState extends State<AuctionListPage> {
 
               // Dropdown kategori
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
@@ -161,113 +164,136 @@ class _AuctionListPageState extends State<AuctionListPage> {
                     }
 
                     return RefreshIndicator(
-                      onRefresh: _refreshAuctions,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: items.length,
-                        itemBuilder: (context, index) {
-                          final item = items[index];
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 400),
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // gambar barang
-                                ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                                  child: Image.network(
-                                    "http://127.0.0.1:8000/storage/${item.gambarBarang}",
-                                    height: 180,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
+                        onRefresh: _refreshAuctions,
+                        child: GridView.builder(
+                          padding: const EdgeInsets.all(16),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 1, // tampil 2 item per baris
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio:
+                                1.2, // atur tinggi kartu biar proporsional
+                          ),
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            final item = items[index];
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 400),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item.namaBarang,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        "Harga Awal: Rp${item.hargaAwal}",
-                                        style: TextStyle(
-                                          color: Colors.green.shade700,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: item.status == "aktif"
-                                              ? Colors.green.withOpacity(0.15)
-                                              : Colors.grey.withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Text(
-                                          item.status.toUpperCase(),
-                                          style: TextStyle(
-                                            color: item.status == "aktif"
-                                                ? Colors.green
-                                                : Colors.grey,
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(20)),
+                                    child: Image.network(
+                                      "http://127.0.0.1:8000/storage/${item.gambarBarang}",
+                                      height: 100,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          item.namaBarang,
+                                          style: const TextStyle(
                                             fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          "Rp${item.hargaAwal}",
+                                          style: TextStyle(
+                                            color: Colors.green.shade700,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                  child: ElevatedButton.icon(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF2575FC),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(vertical: 14),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => AuctionDetailPage(item: item),
+                                        const SizedBox(height: 4),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: item.status == "aktif"
+                                                ? Colors.green.withOpacity(0.15)
+                                                : Colors.grey.withOpacity(0.2),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            item.status.toUpperCase(),
+                                            style: TextStyle(
+                                              color: item.status == "aktif"
+                                                  ? Colors.green
+                                                  : Colors.grey,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 11,
+                                            ),
+                                          ),
                                         ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                                    label: const Text(
-                                      "Lihat Detail",
-                                      style: TextStyle(fontSize: 16, color: Colors.white),
+                                        const SizedBox(height: 8),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton.icon(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  const Color(0xFF2575FC),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 8),
+                                            ),
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      AuctionDetailPage(
+                                                          item: item),
+                                                ),
+                                              );
+                                            },
+                                            icon: const Icon(
+                                                Icons.arrow_forward,
+                                                color: Colors.white,
+                                                size: 14),
+                                            label: const Text(
+                                              "Detail",
+                                              style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    );
+                                ],
+                              ),
+                            );
+                          },
+                        ));
                   },
                 ),
               ),
