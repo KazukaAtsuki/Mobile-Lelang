@@ -10,6 +10,7 @@ class AuctionItem {
   final DateTime waktuMulai;
   final DateTime waktuSelesai;
   final String status;
+  final String? kategoriNama; // ✅ tambahkan ini untuk menampilkan nama kategori
 
   AuctionItem({
     required this.id,
@@ -23,6 +24,7 @@ class AuctionItem {
     required this.waktuMulai,
     required this.waktuSelesai,
     required this.status,
+    this.kategoriNama, // ✅ tambahkan ke constructor
   });
 
   factory AuctionItem.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,9 @@ class AuctionItem {
       waktuMulai: DateTime.parse(json['waktu_mulai']),
       waktuSelesai: DateTime.parse(json['waktu_selesai']),
       status: json['status'],
+      kategoriNama: json['kategori'] != null
+          ? json['kategori']['nama_kategori']
+          : null, // ✅ ambil dari nested object jika ada
     );
   }
 }

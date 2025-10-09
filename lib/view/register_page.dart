@@ -26,7 +26,6 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _pickAvatar() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
-
     if (picked != null) {
       setState(() {
         _avatar = File(picked.path);
@@ -63,125 +62,188 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF6A11CB), Color(0xFF2575FC)], // ungu → biru
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      body: Stack(
+        children: [
+          // Background gradient
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
           ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Card(
-              elevation: 8,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              child: Padding(
+
+          // Elemen garis hiasan di background
+          Positioned(
+            top: -60,
+            right: -80,
+            child: Container(
+              width: 220,
+              height: 220,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(120),
+              ),
+            ),
+          ),
+
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Container(
                 padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(height: 10),
+
+                      // Judul Aplikasi
                       Text(
                         "Lelangin",
                         style: TextStyle(
-                          fontSize: 32,
+                          fontSize: 34,
                           fontWeight: FontWeight.bold,
                           color: Colors.blue.shade700,
                           letterSpacing: 1.5,
+                          shadows: [
+                            Shadow(
+                              color: Colors.blue.withOpacity(0.3),
+                              blurRadius: 8,
+                            )
+                          ],
                         ),
                       ),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 25),
 
-                      // Avatar picker
+                      // Avatar Picker
                       GestureDetector(
                         onTap: _pickAvatar,
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundImage: _avatar != null ? FileImage(_avatar!) : null,
-                          child: _avatar == null
-                              ? const Icon(Icons.camera_alt, size: 40, color: Colors.white70)
-                              : null,
-                          backgroundColor: Colors.blue.shade200,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.withOpacity(0.4),
+                                blurRadius: 15,
+                                spreadRadius: 2,
+                              )
+                            ],
+                          ),
+                          child: CircleAvatar(
+                            radius: 50,
+                            backgroundImage: _avatar != null ? FileImage(_avatar!) : null,
+                            backgroundColor: Colors.blue.shade200,
+                            child: _avatar == null
+                                ? const Icon(Icons.camera_alt, size: 40, color: Colors.white)
+                                : null,
+                          ),
                         ),
                       ),
 
-                      const SizedBox(height: 20),
-                      TextFormField(
+                      const SizedBox(height: 25),
+
+                      // Input Fields
+                      _buildInputField(
                         controller: _nameController,
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.person),
-                          labelText: "Name",
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        validator: (val) => val!.isEmpty ? "Enter your name" : null,
+                        icon: Icons.person,
+                        label: "Nama Lengkap",
+                        validator: (val) => val!.isEmpty ? "Masukkan nama kamu" : null,
                       ),
-
                       const SizedBox(height: 16),
-                      TextFormField(
+
+                      _buildInputField(
                         controller: _emailController,
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.email),
-                          labelText: "Email",
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        validator: (val) => val!.isEmpty ? "Enter your email" : null,
+                        icon: Icons.email,
+                        label: "Email",
+                        validator: (val) => val!.isEmpty ? "Masukkan email kamu" : null,
                       ),
-
                       const SizedBox(height: 16),
-                      TextFormField(
+
+                      _buildInputField(
                         controller: _passwordController,
+                        icon: Icons.lock,
+                        label: "Password",
                         obscureText: true,
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.lock),
-                          labelText: "Password",
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        validator: (val) => val!.length < 8 ? "Password min 8 chars" : null,
+                        validator: (val) =>
+                            val!.length < 8 ? "Password minimal 8 karakter" : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      _buildInputField(
+                        controller: _confirmPasswordController,
+                        icon: Icons.lock_outline,
+                        label: "Konfirmasi Password",
+                        obscureText: true,
+                        validator: (val) =>
+                            val != _passwordController.text ? "Password tidak sama" : null,
                       ),
 
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _confirmPasswordController,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          labelText: "Confirm Password",
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        validator: (val) =>
-                            val != _passwordController.text ? "Passwords do not match" : null,
-                      ),
                       const SizedBox(height: 24),
-                      SizedBox(
+
+                      // Tombol Register
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
                         width: double.infinity,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF2575FC), Color(0xFF6A11CB)],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2575FC),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           onPressed: _loading ? null : _register,
                           child: _loading
                               ? const CircularProgressIndicator(color: Colors.white)
-                              : const Text("Register",
-                                  style: TextStyle(fontSize: 16, color: Colors.white)),
+                              : const Text(
+                                  "Daftar Sekarang",
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
 
                       // Ke login page
                       TextButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage()));
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (_) => const LoginPage()));
                         },
-                        child: const Text("Already have an account? Login"),
+                        child: const Text(
+                          "Sudah punya akun? Login di sini",
+                          style: TextStyle(
+                            color: Color(0xFF2575FC),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -189,6 +251,35 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  // Widget helper untuk input field
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required IconData icon,
+    required String label,
+    bool obscureText = false,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      validator: validator,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Colors.blueAccent),
+        labelText: label,
+        labelStyle: const TextStyle(fontWeight: FontWeight.w500),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.9),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Color(0xFF2575FC), width: 2),
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );
