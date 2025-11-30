@@ -10,7 +10,7 @@ class AuctionItem {
   final DateTime waktuMulai;
   final DateTime waktuSelesai;
   final String status;
-  final String? kategoriNama; // ✅ tambahkan ini untuk menampilkan nama kategori
+  final String? kategoriNama; //
 
   AuctionItem({
     required this.id,

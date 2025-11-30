@@ -1,18 +1,34 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/user.dart';
+import 'package:mobile_lelang/models/user.dart';
 
 class UserService {
-  final String baseUrl = "http://127.0.0.1:8000/api"; // ganti sesuai backend kamu
+  final String baseUrl = "http://127.0.0.1:8000/api";
 
-  Future<List<User>> getUsers() async {
-    final response = await http.get(Uri.parse("$baseUrl/users"));
+  Future<User?> getCurrentUser(String token) async {
+    final url = Uri.parse("$baseUrl/user");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      },
+    );
+
+    print("===== FETCH USER =====");
+    print("URL: $url");
+    print("TOKEN: $token");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+    print("======================");
 
     if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      return data.map((json) => User.fromJson(json)).toList();
+      final json = jsonDecode(response.body);
+      return User.fromJson(json["data"] ?? json);
     } else {
-      throw Exception("Failed to load users");
+      print("Error fetch user: ${response.body}");
+      return null;
     }
   }
-} 
+}

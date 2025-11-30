@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_lelang/view/auction/auction_page.dart';
+import 'package:mobile_lelang/view/auction/place_bid_history.dart'; // Import file baru tadi
+import 'package:mobile_lelang/view/profile/profile.dart';
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+class BottomNavbar extends StatefulWidget {
+  const BottomNavbar({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<BottomNavbar> createState() => _BottomNavbarState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _BottomNavbarState extends State<BottomNavbar> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    const AuctionListPage(),   // Halaman Lelang
-    const Center(child: Text("Riwayat Lelang")), // Dummy Riwayat
-    const Center(child: Text("Profil Saya")),    // Dummy Profil
+    const AuctionListPage(),
+    const HistoryBidPage(), // Ganti dengan halaman History yang baru dibuat
+    const ProfilePage(),
   ];
 
   void _onItemTapped(int index) {
@@ -29,17 +31,19 @@ class _MainPageState extends State<MainPage> {
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF2575FC),
+        selectedItemColor: const Color(0xFF4A47D5),
         unselectedItemColor: Colors.grey,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.gavel),
-            label: "Lelang",
+            icon: Icon(Icons.home_filled),
+            label: "Beranda",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: "Riwayat",
+            icon: Icon(Icons.access_time_filled),
+            label: "Status Bid", // Nama tab yang lebih relevan
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

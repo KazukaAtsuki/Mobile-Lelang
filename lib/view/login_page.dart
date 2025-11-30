@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_lelang/services/auth.dart';
-import 'package:mobile_lelang/view/auction/auction_page.dart';
 import 'package:mobile_lelang/view/navbar/bottomNavbar.dart';
 import 'package:mobile_lelang/view/register_page.dart';
 
@@ -32,13 +32,13 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text,
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login success: ${response['user']['email']}")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text("Login success: ${response['user']['email']}")),
+      // );
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MainPage()),
+        MaterialPageRoute(builder: (context) => const BottomNavbar()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -52,172 +52,157 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // 🌈 Background gradient lembut
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      backgroundColor: const Color(0xFFF9FAFB),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 🔹 Logo & Judul
+              Text(
+                "Lelangin",
+                style: GoogleFonts.poppins(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF0B1221),
+                ),
               ),
-            ),
-          ),
+              const SizedBox(height: 40),
 
-          // ✨ Decorative circles background
-          Positioned(
-            top: -80,
-            left: -40,
-            child: Container(
-              height: 200,
-              width: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.1),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -100,
-            right: -60,
-            child: Container(
-              height: 240,
-              width: 240,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.1),
-              ),
-            ),
-          ),
-
-          // 📱 Login Form Glassmorphism
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Container(
-                padding: const EdgeInsets.all(24),
+              // 🔸 Card Form Login
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(28),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: Colors.white.withOpacity(0.3)),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withOpacity(0.05),
                       blurRadius: 20,
-                      offset: const Offset(0, 8),
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
                 child: Form(
                   key: _formKey,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 10),
-
-                      // 🌀 Logo / Judul Aplikasi
-                      const Icon(
-                        Icons.gavel_rounded,
-                        color: Colors.white,
-                        size: 64,
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        "Lelangin",
-                        style: TextStyle(
-                          fontSize: 34,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 1.4,
+                      Text(
+                        "Masuk ke akunmu",
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF0B1221),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
 
-                      // 📧 Email Field
+                      // 📧 Email
                       TextFormField(
                         controller: _emailController,
-                        style: const TextStyle(color: Colors.white),
+                        keyboardType: TextInputType.emailAddress,
+                        style: GoogleFonts.poppins(color: Colors.black87),
                         decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(0.1),
-                          prefixIcon: const Icon(Icons.email, color: Colors.white),
                           labelText: "Email",
-                          labelStyle: const TextStyle(color: Colors.white70),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
+                          labelStyle: GoogleFonts.poppins(
+                              color: Colors.black54, fontSize: 14),
+                          prefixIcon:
+                              const Icon(Icons.email_outlined, color: Colors.black54),
+                          filled: true,
+                          fillColor: Colors.white,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: Color(0xFFE5E7EB), width: 1.2),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: Color(0xFF2563EB), width: 2),
                           ),
                         ),
-                        validator: (val) => val!.isEmpty ? "Masukkan email kamu" : null,
+                        validator: (val) =>
+                            val!.isEmpty ? "Masukkan email kamu" : null,
                       ),
+                      const SizedBox(height: 18),
 
-                      const SizedBox(height: 16),
-
-                      // 🔒 Password Field
+                      // 🔒 Password
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
-                        style: const TextStyle(color: Colors.white),
+                        style: GoogleFonts.poppins(color: Colors.black87),
                         decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(0.1),
-                          prefixIcon: const Icon(Icons.lock, color: Colors.white),
                           labelText: "Password",
-                          labelStyle: const TextStyle(color: Colors.white70),
+                          labelStyle: GoogleFonts.poppins(
+                              color: Colors.black54, fontSize: 14),
+                          prefixIcon:
+                              const Icon(Icons.lock_outline, color: Colors.black54),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                              color: Colors.white70,
+                              _obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: Colors.black54,
                             ),
                             onPressed: () =>
                                 setState(() => _obscurePassword = !_obscurePassword),
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
+                          filled: true,
+                          fillColor: Colors.white,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: Color(0xFFE5E7EB), width: 1.2),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: Color(0xFF2563EB), width: 2),
                           ),
                         ),
-                        validator: (val) => val!.length < 8 ? "Password minimal 8 karakter" : null,
+                        validator: (val) => val!.length < 8
+                            ? "Password minimal 8 karakter"
+                            : null,
                       ),
+                      const SizedBox(height: 26),
 
-                      const SizedBox(height: 30),
-
-                      // 🚪 Tombol Login
+                      // 🚀 Tombol Login
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: _loading ? null : _login,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white.withOpacity(0.2),
-                            elevation: 6,
+                            backgroundColor: const Color(0xFF0B1221),
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
                           child: _loading
                               ? const CircularProgressIndicator(color: Colors.white)
-                              : const Text(
+                              : Text(
                                   "Masuk Sekarang",
-                                  style: TextStyle(
+                                  style: GoogleFonts.poppins(
                                     color: Colors.white,
-                                    fontSize: 18,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                         ),
                       ),
+                      const SizedBox(height: 18),
 
-                      const SizedBox(height: 20),
-
-                      // ✨ Tombol Register
+                      // ✨ Daftar link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
+                          Text(
                             "Belum punya akun?",
-                            style: TextStyle(color: Colors.white70),
+                            style: GoogleFonts.poppins(color: Colors.black54),
                           ),
                           TextButton(
                             onPressed: () {
@@ -227,11 +212,11 @@ class _LoginPageState extends State<LoginPage> {
                                     builder: (_) => const RegisterPage()),
                               );
                             },
-                            child: const Text(
+                            child: Text(
                               "Daftar Sekarang",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                              style: GoogleFonts.poppins(
+                                color: const Color(0xFF2563EB),
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -241,9 +226,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

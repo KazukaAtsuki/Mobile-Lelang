@@ -100,4 +100,31 @@ class AuthService {
       },
     );
   }
+
+  /// ✅ CEK LOGIN STATUS (dipanggil saat splash screen)
+  Future<bool> isLoggedIn() async {
+    final token = await getToken();
+    if (token == null) return false;
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/user"),
+        headers: {
+          HttpHeaders.authorizationHeader: "Bearer $token",
+          HttpHeaders.acceptHeader: "application/json",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return true; // Token masih valid
+      } else {
+        // Token invalid atau expired
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove("token");
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
 }

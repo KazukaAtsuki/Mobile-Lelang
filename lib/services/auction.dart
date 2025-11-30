@@ -43,7 +43,7 @@ class AuctionService {
     }
   }
 
-  // Ambil daftar kategori untuk filter
+  // Filter Kategori
   Future<List<Map<String, dynamic>>> getCategories() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   final token = prefs.getString("token");
