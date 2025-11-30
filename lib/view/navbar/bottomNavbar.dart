@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_lelang/view/auction/auction_page.dart';
-import 'package:mobile_lelang/view/auction/place_bid_history.dart'; // Import file baru tadi
+import 'package:mobile_lelang/view/auction/place_bid_history.dart';
 import 'package:mobile_lelang/view/profile/profile.dart';
 
 class BottomNavbar extends StatefulWidget {
@@ -15,7 +15,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
 
   final List<Widget> _pages = [
     const AuctionListPage(),
-    const HistoryBidPage(), // Ganti dengan halaman History yang baru dibuat
+    const HistoryBidPage(), 
     const ProfilePage(),
   ];
 
@@ -42,7 +42,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
             label: "Beranda",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.access_time_filled),
+            icon: Icon(Icons.history),
             label: "Status Bid", // Nama tab yang lebih relevan
           ),
           BottomNavigationBarItem(

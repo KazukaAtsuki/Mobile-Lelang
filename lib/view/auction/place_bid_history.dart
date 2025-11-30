@@ -14,7 +14,6 @@ class _HistoryBidPageState extends State<HistoryBidPage> {
   bool _isLoading = true;
   
   int? _currentUserId;
-  // List ini akan berisi data lelang unik yang pernah diikuti user
   List<Map<String, dynamic>> _participatedAuctions = [];
 
   @override
@@ -26,7 +25,7 @@ class _HistoryBidPageState extends State<HistoryBidPage> {
   Future<void> _fetchData() async {
     setState(() => _isLoading = true);
 
-    // 1. Ambil User ID dulu
+    // 1. Ambil User ID
     final user = await _bidService.getCurrentUser();
     if (user == null) {
       setState(() => _isLoading = false);
@@ -38,10 +37,8 @@ class _HistoryBidPageState extends State<HistoryBidPage> {
     final allBids = await _bidService.getAllBidsRaw();
 
     // 3. Logic Pengelompokan Data
-    // Kita butuh map untuk menyimpan Lelang unik yang diikuti user
     Map<int, Map<String, dynamic>> auctionMap = {};
 
-    // Filter bid milik user saya
     final myBids = allBids.where((bid) => bid['user_id'] == _currentUserId).toList();
 
     for (var myBid in myBids) {
@@ -50,39 +47,54 @@ class _HistoryBidPageState extends State<HistoryBidPage> {
       
       int lelangId = lelang['id'];
       
-      // Jika belum ada di map, masukkan
       if (!auctionMap.containsKey(lelangId)) {
-        // Cari semua bid untuk lelang ini (dari global list) untuk bikin Leaderboard
+        // --- LOGIKA PERHITUNGAN BID ---
         final bidsForThisItem = allBids.where((b) => b['lelang_id'] == lelangId).toList();
         
-        // Urutkan bid dari tertinggi ke terendah
         bidsForThisItem.sort((a, b) {
            int priceA = int.parse(a['harga'].toString());
            int priceB = int.parse(b['harga'].toString());
            return priceB.compareTo(priceA);
         });
 
-        // Ambil Top 5
         final top5 = bidsForThisItem.take(5).toList();
-
-        // Cari harga tertinggi (Pemenang sementara)
         int highestPrice = int.parse(top5.first['harga'].toString());
 
-        // Cari harga tertinggi milik SAYA di item ini
         final myBidsForThisItem = bidsForThisItem.where((b) => b['user_id'] == _currentUserId).toList();
         int myHighestBid = 0;
         if(myBidsForThisItem.isNotEmpty){
            myHighestBid = int.parse(myBidsForThisItem.first['harga'].toString());
         }
 
-        // Tentukan status
-        bool isWinning = (myHighestBid >= highestPrice);
+        // --- LOGIKA STATUS MENANG/KALAH (BARU) ---
+        String statusLelang = lelang['status'] ?? 'aktif'; // 'aktif', 'selesai', 'dibatalkan'
+        int? winnerId = lelang['winner_id']; // Dari migrasi database
+        
+        // Cek apakah saya sedang memimpin (Logic lama untuk status aktif)
+        bool isLeading = (myHighestBid >= highestPrice);
+
+        // Cek hasil akhir
+        bool isFinished = statusLelang == 'selesai';
+        bool isFinalWinner = false;
+
+        if (isFinished) {
+          // Jika ada winner_id dari database, gunakan itu
+          if (winnerId != null) {
+            isFinalWinner = (winnerId == _currentUserId);
+          } else {
+            // Fallback jika backend belum set winner_id tapi status sudah selesai
+            // Kita anggap menang jika tawaran kita paling tinggi
+            isFinalWinner = isLeading;
+          }
+        }
 
         auctionMap[lelangId] = {
           'lelang': lelang,
           'my_highest_bid': myHighestBid,
           'top_5': top5,
-          'is_winning': isWinning,
+          'is_leading': isLeading,       // Status sementara (Aktif)
+          'is_finished': isFinished,     // Status lelang selesai?
+          'is_final_winner': isFinalWinner, // Hasil akhir (Menang/Kalah)
           'highest_price_now': highestPrice,
         };
       }
@@ -121,19 +133,51 @@ class _HistoryBidPageState extends State<HistoryBidPage> {
                     final itemData = _participatedAuctions[index];
                     final lelang = itemData['lelang'];
                     final List<dynamic> top5 = itemData['top_5'];
-                    final bool isWinning = itemData['is_winning'];
                     final int myBid = itemData['my_highest_bid'];
+
+                    // Ambil status logic baru
+                    final bool isFinished = itemData['is_finished'];
+                    final bool isFinalWinner = itemData['is_final_winner'];
+                    final bool isLeading = itemData['is_leading'];
+
+                    // --- LOGIKA TAMPILAN UI ---
+                    Color headerColor;
+                    String statusText;
+                    IconData statusIcon;
+
+                    if (isFinished) {
+                      if (isFinalWinner) {
+                        headerColor = Colors.green[800]!; // Hijau Tua untuk Menang
+                        statusText = "SELAMAT! ANDA MENANG";
+                        statusIcon = Icons.emoji_events;
+                      } else {
+                        headerColor = Colors.grey[700]!; // Abu-abu untuk Kalah
+                        statusText = "LELANG SELESAI (KALAH)";
+                        statusIcon = Icons.close;
+                      }
+                    } else {
+                      // Masih Aktif
+                      if (isLeading) {
+                        headerColor = Colors.green; // Hijau biasa untuk Memimpin
+                        statusText = "MEMIMPIN";
+                        statusIcon = Icons.check_circle;
+                      } else {
+                        headerColor = Colors.redAccent; // Merah untuk Terbalap
+                        statusText = "TERBALAP";
+                        statusIcon = Icons.warning;
+                      }
+                    }
 
                     return Card(
                       elevation: 4,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       child: Column(
                         children: [
-                          // Header Card (Status Menang/Kalah)
+                          // Header Card (Status Dinamis)
                           Container(
                             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                             decoration: BoxDecoration(
-                              color: isWinning ? Colors.green : Colors.redAccent,
+                              color: headerColor,
                               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                             ),
                             child: Row(
@@ -154,10 +198,10 @@ class _HistoryBidPageState extends State<HistoryBidPage> {
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(isWinning ? Icons.check_circle : Icons.warning, color: Colors.white, size: 16),
+                                      Icon(statusIcon, color: Colors.white, size: 16),
                                       const SizedBox(width: 4),
                                       Text(
-                                        isWinning ? "MEMIMPIN" : "TERBALAP",
+                                        statusText,
                                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
                                       ),
                                     ],
@@ -181,6 +225,24 @@ class _HistoryBidPageState extends State<HistoryBidPage> {
                                   ],
                                 ),
                                 const Divider(height: 24),
+
+                                // Pesan Khusus Jika Menang
+                                if (isFinished && isFinalWinner)
+                                  Container(
+                                    margin: const EdgeInsets.only(bottom: 16),
+                                    padding: const EdgeInsets.all(10),
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: Colors.green[50],
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.green)
+                                    ),
+                                    child: const Text(
+                                      "Selamat! Barang ini menjadi milik Anda. Silakan proses pembayaran.",
+                                      style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
                                 
                                 // Leaderboard Title
                                 const Text(
@@ -207,16 +269,19 @@ class _HistoryBidPageState extends State<HistoryBidPage> {
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            color: idx == 0 ? Colors.amber : Colors.grey[200],
+                                            // Jika lelang selesai, winner dapet warna emas (rank 1)
+                                            color: (idx == 0) ? Colors.amber : Colors.grey[200],
                                           ),
-                                          child: Text(
-                                            "${idx + 1}",
-                                            style: TextStyle(
-                                              fontSize: 12, 
-                                              fontWeight: FontWeight.bold,
-                                              color: idx == 0 ? Colors.white : Colors.black54
-                                            ),
-                                          ),
+                                          child: (isFinished && idx == 0) 
+                                            ? const Icon(Icons.star, size: 14, color: Colors.white)
+                                            : Text(
+                                                "${idx + 1}",
+                                                style: TextStyle(
+                                                  fontSize: 12, 
+                                                  fontWeight: FontWeight.bold,
+                                                  color: idx == 0 ? Colors.white : Colors.black54
+                                                ),
+                                              ),
                                         ),
                                         const SizedBox(width: 10),
                                         // Nama User
@@ -242,8 +307,8 @@ class _HistoryBidPageState extends State<HistoryBidPage> {
                                   );
                                 }),
 
-                                // Pesan jika kalah
-                                if (!isWinning)
+                                // Pesan jika kalah / terbalap
+                                if (!isFinalWinner && !isLeading && !isFinished)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 12),
                                     child: Container(
